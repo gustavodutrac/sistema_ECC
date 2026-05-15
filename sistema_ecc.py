@@ -67,7 +67,10 @@ with aba1:
         col1, col2 = st.columns(2)
 
         with col1:
-            produto = st.text_input("Nome do Produto")
+
+            produto = st.text_input(
+                "Nome do Produto"
+            )
 
             valor_unitario = st.number_input(
                 "Valor Unitário",
@@ -77,44 +80,82 @@ with aba1:
             )
 
         with col2:
+
             quantidade = st.number_input(
                 "Quantidade",
                 min_value=1,
                 step=1
             )
 
-            casal = st.text_input("Nome do Casal")
-
-            equipe = st.text_input("Equipe do Casal")
-
-        valor_total = valor_unitario * quantidade
-
-        st.info(f"Valor Total: R$ {valor_total:.2f}")
-
-        salvar = st.form_submit_button("Salvar Venda")
-
-        if salvar:
-
-            nova_venda = {
-                "Data": datetime.now().strftime("%d/%m/%Y %H:%M"),
-                "Tipo": "Fiado",
-                "Produto": produto,
-                "Valor Unitario": valor_unitario,
-                "Quantidade": quantidade,
-                "Valor Total": valor_total,
-                "Casal": casal,
-                "Equipe": equipe,
-                "Status": "Pendente"
-            }
-
-            df = pd.concat(
-                [df, pd.DataFrame([nova_venda])],
-                ignore_index=True
+            casal = st.text_input(
+                "Nome do Casal"
             )
 
-            df.to_csv(ARQUIVO, index=False)
+            equipe = st.text_input(
+                "Equipe do Casal"
+            )
 
-            st.success("Venda salva com sucesso!")
+        valor_total = (
+            valor_unitario * quantidade
+        )
+
+        st.info(
+            f"Valor Total: R$ {valor_total:.2f}"
+        )
+
+        salvar = st.form_submit_button(
+            "Salvar Venda"
+        )
+
+        # ====================================
+        # VALIDAÇÃO
+        # ====================================
+        if salvar:
+
+            if (
+                not produto.strip()
+                or valor_unitario <= 0
+                or quantidade <= 0
+                or not casal.strip()
+                or not equipe.strip()
+            ):
+
+                st.error(
+                    "Preencha todos os campos corretamente!"
+                )
+
+            else:
+
+                nova_venda = {
+                    "Data": datetime.now().strftime(
+                        "%d/%m/%Y %H:%M"
+                    ),
+                    "Tipo": "Fiado",
+                    "Produto": produto,
+                    "Valor Unitario": valor_unitario,
+                    "Quantidade": quantidade,
+                    "Valor Total": valor_total,
+                    "Casal": casal,
+                    "Equipe": equipe,
+                    "Status": "Pendente"
+                }
+
+                df = pd.concat(
+                    [
+                        df,
+                        pd.DataFrame([nova_venda])
+                    ],
+                    ignore_index=True
+                )
+
+                df.to_csv(
+                    ARQUIVO,
+                    index=False
+                )
+
+                st.success(
+                    "Venda salva com sucesso!"
+                )
 
 # ====================================
 # ABA 2 - PAGAMENTO NA HORA
@@ -128,7 +169,10 @@ with aba2:
         col1, col2 = st.columns(2)
 
         with col1:
-            produto_pg = st.text_input("Produto")
+
+            produto_pg = st.text_input(
+                "Produto"
+            )
 
             valor_unitario_pg = st.number_input(
                 "Valor Unitário ",
@@ -138,40 +182,72 @@ with aba2:
             )
 
         with col2:
+
             quantidade_pg = st.number_input(
                 "Quantidade ",
                 min_value=1,
                 step=1
             )
 
-        valor_total_pg = valor_unitario_pg * quantidade_pg
+        valor_total_pg = (
+            valor_unitario_pg * quantidade_pg
+        )
 
-        st.info(f"Valor Total: R$ {valor_total_pg:.2f}")
+        st.info(
+            f"Valor Total: R$ {valor_total_pg:.2f}"
+        )
 
-        salvar_pg = st.form_submit_button("Salvar Pagamento")
+        salvar_pg = st.form_submit_button(
+            "Salvar Pagamento"
+        )
 
+        # ====================================
+        # VALIDAÇÃO
+        # ====================================
         if salvar_pg:
 
-            nova_venda = {
-                "Data": datetime.now().strftime("%d/%m/%Y %H:%M"),
-                "Tipo": "Pago na Hora",
-                "Produto": produto_pg,
-                "Valor Unitario": valor_unitario_pg,
-                "Quantidade": quantidade_pg,
-                "Valor Total": valor_total_pg,
-                "Casal": "",
-                "Equipe": "",
-                "Status": "Pago"
-            }
+            if (
+                not produto_pg.strip()
+                or valor_unitario_pg <= 0
+                or quantidade_pg <= 0
+            ):
 
-            df = pd.concat(
-                [df, pd.DataFrame([nova_venda])],
-                ignore_index=True
-            )
+                st.error(
+                    "Preencha todos os campos corretamente!"
+                )
 
-            df.to_csv(ARQUIVO, index=False)
+            else:
 
-            st.success("Pagamento salvo com sucesso!")
+                nova_venda = {
+                    "Data": datetime.now().strftime(
+                        "%d/%m/%Y %H:%M"
+                    ),
+                    "Tipo": "Pago na Hora",
+                    "Produto": produto_pg,
+                    "Valor Unitario": valor_unitario_pg,
+                    "Quantidade": quantidade_pg,
+                    "Valor Total": valor_total_pg,
+                    "Casal": "",
+                    "Equipe": "",
+                    "Status": "Pago"
+                }
+
+                df = pd.concat(
+                    [
+                        df,
+                        pd.DataFrame([nova_venda])
+                    ],
+                    ignore_index=True
+                )
+
+                df.to_csv(
+                    ARQUIVO,
+                    index=False
+                )
+
+                st.success(
+                    "Pagamento salvo com sucesso!"
+                )
 
 # ====================================
 # RESUMO GERAL
@@ -184,23 +260,24 @@ if not df.empty:
 
     # TOTAL A RECEBER
     total_geral = (
-        df[df["Status"] == "Pendente"]["Valor Total"]
-        .sum()
+        df[
+            df["Status"] == "Pendente"
+        ]["Valor Total"].sum()
     )
 
-    # TOTAL FIADO PENDENTE
+    # TOTAL FIADO
     total_fiado = (
         df[
             (df["Tipo"] == "Fiado") &
             (df["Status"] == "Pendente")
-        ]["Valor Total"]
-        .sum()
+        ]["Valor Total"].sum()
     )
 
     # TOTAL PAGO NA HORA
     total_pago = (
-        df[df["Tipo"] == "Pago na Hora"]["Valor Total"]
-        .sum()
+        df[
+            df["Tipo"] == "Pago na Hora"
+        ]["Valor Total"].sum()
     )
 
     col1, col2, col3 = st.columns(3)
@@ -224,9 +301,20 @@ else:
 
     col1, col2, col3 = st.columns(3)
 
-    col1.metric("💰 Total a Receber", "R$ 0,00")
-    col2.metric("🧾 Total Fiado", "R$ 0,00")
-    col3.metric("💵 Pago na Hora", "R$ 0,00")
+    col1.metric(
+        "💰 Total a Receber",
+        "R$ 0,00"
+    )
+
+    col2.metric(
+        "🧾 Total Fiado",
+        "R$ 0,00"
+    )
+
+    col3.metric(
+        "💵 Pago na Hora",
+        "R$ 0,00"
+    )
 
 # ====================================
 # HISTÓRICO DE VENDAS
@@ -244,7 +332,9 @@ if not df.empty:
 
 else:
 
-    st.warning("Nenhuma venda cadastrada.")
+    st.warning(
+        "Nenhuma venda cadastrada."
+    )
 
 # ====================================
 # CONSULTA POR CASAL
@@ -253,14 +343,20 @@ st.markdown("---")
 
 st.subheader("🔎 Consulta por Casal")
 
-pesquisa = st.text_input("Digite o nome do casal")
+pesquisa = st.text_input(
+    "Digite o nome do casal"
+)
 
 if pesquisa:
 
     resultado = df[
         df["Casal"]
         .astype(str)
-        .str.contains(pesquisa, case=False, na=False)
+        .str.contains(
+            pesquisa,
+            case=False,
+            na=False
+        )
     ]
 
     if not resultado.empty:
@@ -270,7 +366,10 @@ if pesquisa:
             resultado["Status"] == "Pendente"
         ]
 
-        total_pendente = pendentes["Valor Total"].sum()
+        total_pendente = (
+            pendentes["Valor Total"]
+            .sum()
+        )
 
         st.info(
             f"Total pendente: R$ {total_pendente:.2f}"
@@ -281,10 +380,14 @@ if pesquisa:
             width="stretch"
         )
 
-        # BOTÃO DE BAIXA
+        # ====================================
+        # BAIXA DE PAGAMENTO
+        # ====================================
         if total_pendente > 0:
 
-            if st.button("✅ Dar baixa no pagamento"):
+            if st.button(
+                "✅ Dar baixa no pagamento"
+            ):
 
                 df.loc[
                     df["Casal"]
@@ -297,7 +400,10 @@ if pesquisa:
                     "Status"
                 ] = "Pago"
 
-                df.to_csv(ARQUIVO, index=False)
+                df.to_csv(
+                    ARQUIVO,
+                    index=False
+                )
 
                 st.success(
                     "Pagamento baixado com sucesso!"
@@ -318,7 +424,9 @@ st.markdown("---")
 
 st.download_button(
     label="📥 Baixar Relatório CSV",
-    data=df.to_csv(index=False).encode("utf-8"),
+    data=df.to_csv(index=False).encode(
+        "utf-8"
+    ),
     file_name="relatorio_vendas.csv",
     mime="text/csv"
 )
