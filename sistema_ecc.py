@@ -13,10 +13,15 @@ st.set_page_config(
 )
 
 # ====================================
-# ARQUIVO CSV
+# ARQUIVOS
 # ====================================
 ARQUIVO = "vendas.csv"
+ARQUIVO_PRODUTOS = "produtos.csv"
+ARQUIVO_CASAIS = "casais.csv"
 
+# ====================================
+# COLUNAS
+# ====================================
 colunas = [
     "Data",
     "Tipo",
@@ -30,15 +35,53 @@ colunas = [
 ]
 
 # ====================================
-# CRIA CSV SE NÃO EXISTIR
+# CRIAR CSV VENDAS
 # ====================================
 if not Path(ARQUIVO).exists():
-    pd.DataFrame(columns=colunas).to_csv(ARQUIVO, index=False)
+
+    pd.DataFrame(
+        columns=colunas
+    ).to_csv(
+        ARQUIVO,
+        index=False
+    )
 
 # ====================================
-# CARREGA DADOS
+# CRIAR CSV PRODUTOS
+# ====================================
+if not Path(ARQUIVO_PRODUTOS).exists():
+
+    pd.DataFrame(
+        columns=["Produto", "Valor"]
+    ).to_csv(
+        ARQUIVO_PRODUTOS,
+        index=False
+    )
+
+# ====================================
+# CRIAR CSV CASAIS
+# ====================================
+if not Path(ARQUIVO_CASAIS).exists():
+
+    pd.DataFrame(
+        columns=["Casal", "Equipe"]
+    ).to_csv(
+        ARQUIVO_CASAIS,
+        index=False
+    )
+
+# ====================================
+# CARREGAR DADOS
 # ====================================
 df = pd.read_csv(ARQUIVO)
+
+df_produtos = pd.read_csv(
+    ARQUIVO_PRODUTOS
+)
+
+df_casais = pd.read_csv(
+    ARQUIVO_CASAIS
+)
 
 # ====================================
 # TÍTULO
@@ -50,9 +93,11 @@ st.markdown("---")
 # ====================================
 # ABAS
 # ====================================
-aba1, aba2 = st.tabs([
+aba1, aba2, aba3, aba4 = st.tabs([
     "🧾 Venda para Casal",
-    "💵 Pagamento na Hora"
+    "💵 Pagamento na Hora",
+    "📦 Cadastro de Produtos",
+    "👩‍❤️‍👨 Cadastro de Casais"
 ])
 
 # ====================================
@@ -60,9 +105,9 @@ aba1, aba2 = st.tabs([
 # ====================================
 with aba1:
 
-    st.subheader("Venda para Casal")
+    st.subheader("🧾 Venda para Casal")
 
-    with st.form("form_casal"):
+    with st.form("form_venda_casal"):
 
         col1, col2 = st.columns(2)
 
@@ -121,7 +166,7 @@ with aba1:
             ):
 
                 st.error(
-                    "Preencha todos os campos corretamente!"
+                    "Preencha todos os campos!"
                 )
 
             else:
@@ -162,7 +207,7 @@ with aba1:
 # ====================================
 with aba2:
 
-    st.subheader("Pagamento na Hora")
+    st.subheader("💵 Pagamento na Hora")
 
     with st.form("form_pagamento"):
 
@@ -201,9 +246,6 @@ with aba2:
             "Salvar Pagamento"
         )
 
-        # ====================================
-        # VALIDAÇÃO
-        # ====================================
         if salvar_pg:
 
             if (
@@ -213,7 +255,7 @@ with aba2:
             ):
 
                 st.error(
-                    "Preencha todos os campos corretamente!"
+                    "Preencha todos os campos!"
                 )
 
             else:
@@ -246,8 +288,135 @@ with aba2:
                 )
 
                 st.success(
-                    "Pagamento salvo com sucesso!"
+                    "Pagamento salvo!"
                 )
+
+# ====================================
+# ABA 3 - CADASTRO PRODUTOS
+# ====================================
+with aba3:
+
+    st.subheader("📦 Cadastro de Produtos")
+
+    with st.form("form_produto"):
+
+        nome_produto = st.text_input(
+            "Nome do Produto"
+        )
+
+        valor_produto = st.number_input(
+            "Valor do Produto",
+            min_value=0.0,
+            step=0.5,
+            format="%.2f"
+        )
+
+        salvar_produto = st.form_submit_button(
+            "Salvar Produto"
+        )
+
+        if salvar_produto:
+
+            if (
+                not nome_produto.strip()
+                or valor_produto <= 0
+            ):
+
+                st.error(
+                    "Preencha todos os campos!"
+                )
+
+            else:
+
+                novo_produto = {
+                    "Produto": nome_produto,
+                    "Valor": valor_produto
+                }
+
+                df_produtos = pd.concat(
+                    [
+                        df_produtos,
+                        pd.DataFrame([novo_produto])
+                    ],
+                    ignore_index=True
+                )
+
+                df_produtos.to_csv(
+                    ARQUIVO_PRODUTOS,
+                    index=False
+                )
+
+                st.success(
+                    "Produto cadastrado!"
+                )
+
+    st.dataframe(
+        df_produtos,
+        width="stretch"
+    )
+
+# ====================================
+# ABA 4 - CADASTRO CASAIS
+# ====================================
+with aba4:
+
+    st.subheader(
+        "👩‍❤️‍👨 Cadastro de Casais"
+    )
+
+    with st.form("form_casal_cadastro"):
+
+        nome_casal = st.text_input(
+            "Nome do Casal"
+        )
+
+        equipe_casal = st.text_input(
+            "Equipe"
+        )
+
+        salvar_casal = st.form_submit_button(
+            "Salvar Casal"
+        )
+
+        if salvar_casal:
+
+            if (
+                not nome_casal.strip()
+                or not equipe_casal.strip()
+            ):
+
+                st.error(
+                    "Preencha todos os campos!"
+                )
+
+            else:
+
+                novo_casal = {
+                    "Casal": nome_casal,
+                    "Equipe": equipe_casal
+                }
+
+                df_casais = pd.concat(
+                    [
+                        df_casais,
+                        pd.DataFrame([novo_casal])
+                    ],
+                    ignore_index=True
+                )
+
+                df_casais.to_csv(
+                    ARQUIVO_CASAIS,
+                    index=False
+                )
+
+                st.success(
+                    "Casal cadastrado!"
+                )
+
+    st.dataframe(
+        df_casais,
+        width="stretch"
+    )
 
 # ====================================
 # RESUMO GERAL
@@ -258,14 +427,12 @@ st.subheader("📊 Resumo Geral")
 
 if not df.empty:
 
-    # TOTAL A RECEBER
     total_geral = (
         df[
             df["Status"] == "Pendente"
         ]["Valor Total"].sum()
     )
 
-    # TOTAL FIADO
     total_fiado = (
         df[
             (df["Tipo"] == "Fiado") &
@@ -273,7 +440,6 @@ if not df.empty:
         ]["Valor Total"].sum()
     )
 
-    # TOTAL PAGO NA HORA
     total_pago = (
         df[
             df["Tipo"] == "Pago na Hora"
@@ -317,7 +483,7 @@ else:
     )
 
 # ====================================
-# HISTÓRICO DE VENDAS
+# HISTÓRICO
 # ====================================
 st.markdown("---")
 
@@ -361,7 +527,6 @@ if pesquisa:
 
     if not resultado.empty:
 
-        # SOMENTE PENDENTES
         pendentes = resultado[
             resultado["Status"] == "Pendente"
         ]
@@ -380,9 +545,6 @@ if pesquisa:
             width="stretch"
         )
 
-        # ====================================
-        # BAIXA DE PAGAMENTO
-        # ====================================
         if total_pendente > 0:
 
             if st.button(
@@ -406,7 +568,7 @@ if pesquisa:
                 )
 
                 st.success(
-                    "Pagamento baixado com sucesso!"
+                    "Pagamento baixado!"
                 )
 
                 st.rerun()
@@ -418,32 +580,18 @@ if pesquisa:
         )
 
 # ====================================
-# EXPORTAR CSV
-# ====================================
-st.markdown("---")
-
-st.download_button(
-    label="📥 Baixar Relatório CSV",
-    data=df.to_csv(index=False).encode(
-        "utf-8"
-    ),
-    file_name="relatorio_vendas.csv",
-    mime="text/csv"
-)
-
-# ====================================
-# EXCLUIR VENDA COM SENHA
+# EXCLUIR VENDA
 # ====================================
 st.markdown("---")
 
 st.subheader("🗑️ Excluir Venda")
 
-SENHA_EXCLUSAO = "2026"
+SENHA_EXCLUSAO = "1234"
 
 if not df.empty:
 
     venda_selecionada = st.selectbox(
-        "Selecione a venda para excluir",
+        "Selecione a venda",
         df.index,
         format_func=lambda x:
             f"{df.loc[x, 'Data']} | "
@@ -461,7 +609,9 @@ if not df.empty:
 
         if senha == SENHA_EXCLUSAO:
 
-            df = df.drop(venda_selecionada)
+            df = df.drop(
+                venda_selecionada
+            )
 
             df.to_csv(
                 ARQUIVO,
@@ -469,15 +619,33 @@ if not df.empty:
             )
 
             st.success(
-                "Venda excluída com sucesso!"
+                "Venda excluída!"
             )
 
             st.rerun()
 
         else:
 
-            st.error("Senha incorreta!")
+            st.error(
+                "Senha incorreta!"
+            )
 
 else:
 
-    st.info("Nenhuma venda cadastrada.")
+    st.info(
+        "Nenhuma venda cadastrada."
+    )
+
+# ====================================
+# EXPORTAR CSV
+# ====================================
+st.markdown("---")
+
+st.download_button(
+    label="📥 Baixar Relatório CSV",
+    data=df.to_csv(index=False).encode(
+        "utf-8"
+    ),
+    file_name="relatorio_vendas.csv",
+    mime="text/csv"
+)
