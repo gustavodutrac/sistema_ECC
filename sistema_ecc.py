@@ -430,3 +430,54 @@ st.download_button(
     file_name="relatorio_vendas.csv",
     mime="text/csv"
 )
+
+# ====================================
+# EXCLUIR VENDA COM SENHA
+# ====================================
+st.markdown("---")
+
+st.subheader("🗑️ Excluir Venda")
+
+SENHA_EXCLUSAO = "2026"
+
+if not df.empty:
+
+    venda_selecionada = st.selectbox(
+        "Selecione a venda para excluir",
+        df.index,
+        format_func=lambda x:
+            f"{df.loc[x, 'Data']} | "
+            f"{df.loc[x, 'Produto']} | "
+            f"{df.loc[x, 'Casal']} | "
+            f"R$ {df.loc[x, 'Valor Total']:.2f}"
+    )
+
+    senha = st.text_input(
+        "Digite a senha",
+        type="password"
+    )
+
+    if st.button("Excluir Venda"):
+
+        if senha == SENHA_EXCLUSAO:
+
+            df = df.drop(venda_selecionada)
+
+            df.to_csv(
+                ARQUIVO,
+                index=False
+            )
+
+            st.success(
+                "Venda excluída com sucesso!"
+            )
+
+            st.rerun()
+
+        else:
+
+            st.error("Senha incorreta!")
+
+else:
+
+    st.info("Nenhuma venda cadastrada.")
