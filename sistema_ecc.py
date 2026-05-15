@@ -8,7 +8,7 @@ from pathlib import Path
 # ====================================
 st.set_page_config(
     page_title="Sistema de Vendas",
-    page_icon="👩‍❤️‍👨",
+    page_icon="💍",
     layout="wide"
 )
 
@@ -86,7 +86,7 @@ df_casais = pd.read_csv(
 # ====================================
 # TÍTULO
 # ====================================
-st.title("👩‍❤️‍👨 Vendas ECC 2026")
+st.title("💍 Sistema de Vendas do Evento")
 
 st.markdown("---")
 
@@ -111,17 +111,36 @@ with aba1:
 
         col1, col2 = st.columns(2)
 
-        with col1:
+        # ====================================
+        # PRODUTOS
+        # ====================================
+        lista_produtos = (
+            df_produtos["Produto"]
+            .dropna()
+            .tolist()
+        )
 
-            produto = st.text_input(
-                "Nome do Produto"
+        produto = st.selectbox(
+            "Selecione o Produto",
+            options=[""] + lista_produtos
+        )
+
+        valor_unitario = 0.0
+
+        if produto != "":
+
+            valor_unitario = float(
+                df_produtos[
+                    df_produtos["Produto"] == produto
+                ]["Valor"].values[0]
             )
 
-            valor_unitario = st.number_input(
+        with col1:
+
+            st.text_input(
                 "Valor Unitário",
-                min_value=0.0,
-                step=0.5,
-                format="%.2f"
+                value=f"R$ {valor_unitario:.2f}",
+                disabled=True
             )
 
         with col2:
@@ -132,14 +151,40 @@ with aba1:
                 step=1
             )
 
-            casal = st.text_input(
-                "Nome do Casal"
+        # ====================================
+        # CASAIS
+        # ====================================
+        lista_casais = (
+            df_casais["Casal"]
+            .dropna()
+            .tolist()
+        )
+
+        casal = st.selectbox(
+            "Selecione o Casal",
+            options=[""] + lista_casais
+        )
+
+        equipe = ""
+
+        if casal != "":
+
+            equipe = (
+                df_casais[
+                    df_casais["Casal"] == casal
+                ]["Equipe"]
+                .values[0]
             )
 
-            equipe = st.text_input(
-                "Equipe do Casal"
-            )
+        st.text_input(
+            "Equipe",
+            value=equipe,
+            disabled=True
+        )
 
+        # ====================================
+        # TOTAL
+        # ====================================
         valor_total = (
             valor_unitario * quantidade
         )
@@ -158,11 +203,9 @@ with aba1:
         if salvar:
 
             if (
-                not produto.strip()
-                or valor_unitario <= 0
+                produto == ""
+                or casal == ""
                 or quantidade <= 0
-                or not casal.strip()
-                or not equipe.strip()
             ):
 
                 st.error(
@@ -202,6 +245,8 @@ with aba1:
                     "Venda salva com sucesso!"
                 )
 
+                st.rerun()
+
 # ====================================
 # ABA 2 - PAGAMENTO NA HORA
 # ====================================
@@ -213,23 +258,42 @@ with aba2:
 
         col1, col2 = st.columns(2)
 
-        with col1:
+        # ====================================
+        # PRODUTOS
+        # ====================================
+        lista_produtos_pg = (
+            df_produtos["Produto"]
+            .dropna()
+            .tolist()
+        )
 
-            produto_pg = st.text_input(
-                "Produto"
+        produto_pg = st.selectbox(
+            "Selecione o Produto",
+            options=[""] + lista_produtos_pg
+        )
+
+        valor_unitario_pg = 0.0
+
+        if produto_pg != "":
+
+            valor_unitario_pg = float(
+                df_produtos[
+                    df_produtos["Produto"] == produto_pg
+                ]["Valor"].values[0]
             )
 
-            valor_unitario_pg = st.number_input(
-                "Valor Unitário ",
-                min_value=0.0,
-                step=0.5,
-                format="%.2f"
+        with col1:
+
+            st.text_input(
+                "Valor Unitário",
+                value=f"R$ {valor_unitario_pg:.2f}",
+                disabled=True
             )
 
         with col2:
 
             quantidade_pg = st.number_input(
-                "Quantidade ",
+                "Quantidade",
                 min_value=1,
                 step=1
             )
@@ -249,8 +313,7 @@ with aba2:
         if salvar_pg:
 
             if (
-                not produto_pg.strip()
-                or valor_unitario_pg <= 0
+                produto_pg == ""
                 or quantidade_pg <= 0
             ):
 
@@ -290,6 +353,8 @@ with aba2:
                 st.success(
                     "Pagamento salvo!"
                 )
+
+                st.rerun()
 
 # ====================================
 # ABA 3 - CADASTRO PRODUTOS
@@ -349,6 +414,8 @@ with aba3:
                 st.success(
                     "Produto cadastrado!"
                 )
+
+                st.rerun()
 
     st.dataframe(
         df_produtos,
@@ -412,6 +479,8 @@ with aba4:
                 st.success(
                     "Casal cadastrado!"
                 )
+
+                st.rerun()
 
     st.dataframe(
         df_casais,
