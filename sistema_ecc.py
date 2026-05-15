@@ -86,7 +86,7 @@ df_casais = pd.read_csv(
 # ====================================
 # TÍTULO
 # ====================================
-st.title("💍 Sistema de Vendas do Evento")
+st.title("💍 Vendas ECC 2026")
 
 st.markdown("---")
 
